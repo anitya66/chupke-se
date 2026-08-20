@@ -2,29 +2,35 @@ import { useEffect, useState } from "react";
 import { apiClient } from "./lib/apiClient";
 import type { ApiResponse } from "./types/api";
 
+interface AppInfo {
+  name: string;
+  version: string;
+  status: string;
+}
+
 function App() {
-  const [message, setMessage] = useState("Connecting...");
+  const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
 
   useEffect(() => {
-    const fetchHealth = async () => {
+    const fetchAppInfo = async () => {
       try {
         const response =
-          await apiClient.get<ApiResponse<string>>("/health");
+          await apiClient.get<ApiResponse<AppInfo>>("/app/info");
 
-        setMessage(response.data.data ?? "No message received");
+        setAppInfo(response.data.data);
       } catch (error) {
-        console.error("Backend connection failed:", error);
-        setMessage("Backend connection failed");
+        console.error("Failed to load app info:", error);
       }
     };
 
-    fetchHealth();
+    fetchAppInfo();
   }, []);
 
   return (
     <main>
-      <h1>CHUPKE SE</h1>
-      <p>{message}</p>
+      <h1>{appInfo?.name ?? "CHUPKE SE"}</h1>
+      <p>Version: {appInfo?.version ?? "Loading..."}</p>
+      <p>Status: {appInfo?.status ?? "Loading..."}</p>
     </main>
   );
 }
